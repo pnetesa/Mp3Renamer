@@ -9,12 +9,16 @@ namespace Mp3Renamer
 	{
 		public const string Exe = ".exe";
 		public const string Wpl = ".wpl";
-		public const string Mp3 = ".mp3";
-		public const string Wma = ".wma";
-		public const string Wav = ".wav";
+		public const string Txt = ".txt";
+		public static string _customExtension;
 
-		static void Main()
+		static void Main(string[] args)
 		{
+			if (args.Length > 0)
+			{
+				_customExtension = args[0];
+			}
+			
 			RenameFiles(AppDomain.CurrentDomain.BaseDirectory);
 		}
 
@@ -54,30 +58,16 @@ namespace Mp3Renamer
 			{
 				if (!File.Exists(fileName))
 				{
+					Console.WriteLine("Could not find file {0}", Path.GetFileName(fileName));
 					continue;
 				}
 
-				if (fileName.EndsWith(Exe) || fileName.EndsWith(Wpl))
+				if (fileName.EndsWith(Exe) || fileName.EndsWith(Wpl) || fileName.EndsWith(Txt))
 				{
 					continue;
 				}
 
-				if (fileName.EndsWith(Mp3))
-				{
-					MoveToFile(basePath, fileName, index, Mp3);
-				}
-				else if (fileName.EndsWith(Wma))
-				{
-					MoveToFile(basePath, fileName, index, Wma);
-				}
-				else if (fileName.EndsWith(Wav))
-				{
-					MoveToFile(basePath, fileName, index, Wav);
-				}
-				else
-				{
-					MoveToFile(basePath, fileName, index, Mp3);
-				}
+				MoveToFile(basePath, fileName, index);
 
 				index++;
 			}
@@ -85,9 +75,10 @@ namespace Mp3Renamer
 			Console.WriteLine("Renamed {0} files.", index);
 		}
 
-		private static void MoveToFile(string basePath, string fileName, int index, string extenstion)
+		private static void MoveToFile(string basePath, string fileName, int index)
 		{
-			var destPath = GetPath(basePath, index, extenstion);
+			var extension = string.IsNullOrEmpty(_customExtension) ? Path.GetExtension(fileName) : _customExtension;
+			var destPath = GetPath(basePath, index, extension);
 			File.Move(fileName, destPath);
 			Console.WriteLine("{0} -> {1}", Path.GetFileName(fileName), Path.GetFileName(destPath));
 		}
